@@ -4,6 +4,8 @@ import sys
 import numpy as np
 import pathlib
 import NeuralNet
+import MCTS
+import copy
 
 class utttgame:
     NUMBER_OF_SAVED_GAME_STATES = 4
@@ -25,6 +27,25 @@ class utttgame:
         self.last_N_board_states = np.zeros((self.NUMBER_OF_SAVED_GAME_STATES, 3,3,3,3),
                                             dtype=int)
 
+    def get_normalized_win_value(self):
+        if state == 0:
+            return 0.5
+        if state == 1:
+            return 1
+        if state == 2:
+            return 0
+        return -1
+        
+    def copy_game(self):
+        copy = utttgame()
+        copy.turn = self.turn
+        copy.board = np.copy(self.board)
+        copy.outer_field_state = np.copy(self.outer_field_state)
+        copy.last_move = copy.deepcopy(self.last_move)
+        copy.sate = self.state
+        copy.last_N_board_states = np.copy(self.last_N_board_states)
+        return copy
+        
     def move(self, coords):
         if self.state != -1:
             print("Game is already over. State =", self.state)
@@ -71,6 +92,15 @@ class utttgame:
         if self.board_get(coords) != 0:
             return False
         return True
+
+    def get_legal_move_indices(self):
+        lmi = []
+        for i in range(81):
+            action = np.zeros(81)
+            action[i] = 1
+            if self.check_legality(self.cnn_action_to_coords(action)):
+                lmi.append(i)
+        return np.array(lmi)
 
     def update_state(self):
         #Updates self.state as well as self.outer_field_state
@@ -179,6 +209,16 @@ class utttgame:
 def main():
     nn = NeuralNet.neuralnetwork()
     game = utttgame()
+    game.move([np.random.randint(3),
+               np.random.randint(3),
+               np.random.randint(3),
+               np.random.randint(3)])
+    game.move([np.random.randint(3),
+               np.random.randint(3),
+               np.random.randint(3),
+               np.random.randint(3)])
+    print(MCTS.run_mcts(game, nn))
+    sys.exit(2)
     #count = 0
     stats = np.zeros(3, dtype=int)
     while(True):

@@ -7,7 +7,7 @@ MCTS_TEMPERATURE
 #actions are cnn output action vectors hot state
 class Node():
 
-    def __init__(self, state, action=None, prior=1.0):
+    def __init__(self, state=None, action=None, prior=1.0):
         #root node has no parent and no action
         self.action = action
         self.state = state
@@ -16,6 +16,7 @@ class Node():
         self.mean_val = 0
         self.prior = prior
         self.children = []
+        self.to_play = -1
 
     def update(self, value):
         self.visit_count += 1
@@ -26,30 +27,65 @@ class Node():
         return len(self.children) > 0
 
 def run_mcts(self, game, network):
-    root = Node(game.get_convnet_input())
+    root = Node(state = game.get_convnet_input())
 
     for _ in range(NUMBER_SIMULATIONS):
         sim_game = game.copy_game()
         node = root
         search_path = [node]
 
+        terminal = False
         while(node.is_expanded):
             action, node = self.select_mcts_action(node)
             sim_game.move(sim_game.cnn_action_to_coords(action))
+            node.state = sim_game.get_convnet_input()
             search_path.append(node)
+            if sim_game.state != -1:
+                terminal = True
 
-        value = self.evaluate_node_and_expand(node, network)
+        value = self.evaluate_node_and_expand(node, network, sim_game, terminal)
 
         for node in reversed(search_path):
+            v = value if node.to_play == sim_game.turn - 1 else (1 - value)
             node.update(value)
 
     return self.choose_action(root), self.generate_mcts_policy(root)
-#def copy game in utttgame
+
 def select_mcts_action(node):
     #UCTS? algorithm choice
+    best_choice = (0, -1.0*np.inf)
+    for i, child in enumerate(node.children):
+        #in alpha zero paper this is described as slowly(log) growing exploration rate
+        #set this here as constant for now
+        PUCT_C = 1.0
+        PUCT_U = c*child.prior*np.sqrt(node.visit_count)/(1+child.visit_count)
+        action_value = child.mean_val + PUCT_U
+        if action_value >= best_choice[1]:
+            best_choice = (i, action_value)
+        
+    return node.children[best_choice[0]].action, node.children[best_choice[0]]
 
-def evaluate_node_and_expand(node, network):
-    #check where nodes stay in existence??
+def evaluate_node_and_expand(node, network, sim_game, terminal):
+    if not terminal:
+        #check where nodes stay in existence??
+        value, policy_logits = nn.evaluate(node.state)
+        #value.shape = (1,1) policy_logits.shape = (1,81)
+    else:
+        if sim_game.state == 0:
+            return 0.5
+        else:
+            return 0
+        
+    # Expand the node.
+    node.to_play = sim_game.turn - 1
+    legal_move_indices = sim_game.get_legal_move_indices()
+    policy = np.array([np.exp(policy_logits[i]) for i in legal_move_indices])
+    policy_sum = np.sum(policy)
+    for index, p in zip(legal_move_indices, policy):
+        action = np.zeros(81)
+        action[index] = 1
+        node.children.append(Node(state=None, action=action, prior=p / policy_sum))
+    return value
 
 def choose_action(self, root):
     action = np.zeros(81)
