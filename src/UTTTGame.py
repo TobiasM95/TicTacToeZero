@@ -3,6 +3,7 @@
 import sys
 import numpy as np
 import pathlib
+import NeuralNet
 
 class utttgame:
     NUMBER_OF_SAVED_GAME_STATES = 4
@@ -148,7 +149,7 @@ class utttgame:
         #                               r_t,
         #                               (s_t-N+2, .., s_t-2, s_t-1, s_t, s_t+1))
         current_state = self.get_convnet_input()
-        self.move(cnn_action_to_coords(cnn_action))
+        self.move(self.cnn_action_to_coords(cnn_action))
         action = cnn_action
         #REWARD HAS TO BE MANUALLY SET AT THE END OF THE GAME (DISCOUNT, check which player won)
         #saving the state helps with figuring out who won to adjust the reward
@@ -176,6 +177,7 @@ class utttgame:
                 int(inner_column)]
 
 def main():
+    nn = NeuralNet.neuralnetwork()
     game = utttgame()
     #count = 0
     stats = np.zeros(3, dtype=int)
@@ -184,6 +186,7 @@ def main():
                     np.random.randint(3),
                     np.random.randint(3),
                     np.random.randint(3)])
+        #print(nn.evaluate(game.get_convnet_input().reshape(-1,9,9,9)))
         #count += 1
         if game.state != -1:
             stats[game.state] += 1

@@ -5,7 +5,7 @@ import numpy as np
 import pathlib
 import UTTTGame
 import keras
-from keras.layers import Dense, Conv2D, BatchNormalization, Activation
+from keras.layers import Dense, Conv2D, BatchNormalization, Activation, Flatten
 from keras.layers import Input
 from keras.regularizers import l2
 from keras.optimizers import Adam
@@ -22,7 +22,7 @@ class neuralnetwork:
                         optimizer=Adam(self.ADAM_LR))
 
     def init_nn(self):
-        input_shape = np.zeros((9,9,UTTTGame.utttgame.NUMBER_OF_SAVED_GAME_STATES*2+1)).shape
+        input_shape = (9,9,UTTTGame.utttgame.NUMBER_OF_SAVED_GAME_STATES*2+1)
         inputs = Input(shape=input_shape)
         x = self.conv_layer(inputs)
         for i in range(self.NUM_RES_LAYERS):
@@ -69,6 +69,7 @@ class neuralnetwork:
         x = self.conv_layer(x,
                             num_filters = 2,
                             kernel_size = 1)
+        x = Flatten()(x)
         x = Dense(81)(x)
         return x
 
@@ -78,14 +79,22 @@ class neuralnetwork:
         x = self.conv_layer(x,
                             num_filters = 1,
                             kernel_size = 1)
+        x = Flatten()(x)
         x = Dense(256, activation='relu')(x)
         x = Dense(1, activation='tanh')(x)
         return x
         
-
+    def evaluate(self,
+             eval_input):
+        policy, value = self.nn.predict(eval_input)
+        return policy, value
+        
 def main():
+    game = UTTTGame.utttgame()
     nn = neuralnetwork()
-    print(nn.nn.summary())
+    #print(nn.nn.summary())
+    pol, val = nn.evaluate(game.get_convnet_input().reshape(-1,9,9,9))
+    print(pol, val)
     
     #from keras.utils import plot_model
     #import os
