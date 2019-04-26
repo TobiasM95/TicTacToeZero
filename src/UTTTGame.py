@@ -159,7 +159,7 @@ class utttgame:
     def split_flat_board(self, board):
         flat = self.flatten_board(board)
         board_p1 = (flat == 1) * 1
-        board_p2 = (flat == 2) * 2
+        board_p2 = (flat == 2) * 1
         split = np.zeros((9,9,2), dtype=int)
         split[:,:,0] = board_p1
         split[:,:,1] = board_p2
@@ -209,14 +209,11 @@ class utttgame:
 def main():
     nn = NeuralNet.neuralnetwork()
     game = utttgame()
-    game.move([np.random.randint(3),
-               np.random.randint(3),
-               np.random.randint(3),
-               np.random.randint(3)])
-    game.move([np.random.randint(3),
-               np.random.randint(3),
-               np.random.randint(3),
-               np.random.randint(3)])
+    for i in range(150):
+        game.move([np.random.randint(3),
+                   np.random.randint(3),
+                   np.random.randint(3),
+                   np.random.randint(3)])
     print(MCTS.run_mcts(game, nn))
     sys.exit(2)
     #count = 0

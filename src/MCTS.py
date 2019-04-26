@@ -27,6 +27,24 @@ class Node():
     def is_expanded(self):
         return len(self.children) > 0
 
+    def print_node(self, note = ""):
+        print("Node details of", note, ":")
+        if self.action is not None:
+            ai = np.where(self.action == 1)[0]
+        else:
+            ai = None
+        print("Action index:", ai)
+        print("State (convnet state, show current position):")
+        print(self.state[:,:,-3] + self.state[:,:,-2]*2)
+        print("(N, W, Q, P) = (",
+              self.visit_count, ",",
+              self.total_val, ",",
+              self.mean_val, ",",
+              self.prior, ")")
+        print("To play", self.to_play)
+        print("Number of children", len(self.children))
+        print("Turns of children", [np.where(c.action == 1)[0] for c in self.children])
+
 def run_mcts(game, network):
     root = Node(state = game.get_convnet_input())
 
@@ -50,6 +68,7 @@ def run_mcts(game, network):
             v = value if node.to_play == sim_game.turn - 1 else (1 - value)
             node.update(value)
 
+    root.print_node("Root")
     return choose_action(root), generate_mcts_policy(root)
 
 def select_mcts_action(node):
