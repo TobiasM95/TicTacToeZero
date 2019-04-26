@@ -5,7 +5,7 @@ import numpy as np
 import pathlib
 import NeuralNet
 import MCTS
-import copy
+import copy as cp
 
 class utttgame:
     NUMBER_OF_SAVED_GAME_STATES = 4
@@ -41,7 +41,7 @@ class utttgame:
         copy.turn = self.turn
         copy.board = np.copy(self.board)
         copy.outer_field_state = np.copy(self.outer_field_state)
-        copy.last_move = copy.deepcopy(self.last_move)
+        copy.last_move = cp.deepcopy(self.last_move)
         copy.sate = self.state
         copy.last_N_board_states = np.copy(self.last_N_board_states)
         return copy
