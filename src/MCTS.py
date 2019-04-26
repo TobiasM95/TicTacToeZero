@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import numpy as np
 
-NUMBER_SIMULATIONS = 100
+NUMBER_SIMULATIONS = 100 #agz is 800
 MCTS_TEMPERATURE = 1.0
 
 #states are convnet states
@@ -27,6 +27,14 @@ class Node():
     def is_expanded(self):
         return len(self.children) > 0
 
+    def get_depth(self):
+        depth = 0
+        clist = [c for c in self.children]
+        while(len(clist) > 0):
+            clist = [c for p in clist for c in p.children ]
+            depth += 1
+        return depth
+
     def print_node(self, note = ""):
         print("Node details of", note, ":")
         if self.action is not None:
@@ -44,8 +52,9 @@ class Node():
         print("To play", self.to_play)
         print("Number of children", len(self.children))
         print("Turns of children", [np.where(c.action == 1)[0] for c in self.children])
+        print("Max depth of node", self.get_depth())
 
-def run_mcts(game, network):
+def run_mcts(game, network, print_root = False):
     root = Node(state = game.get_convnet_input())
 
     for _ in range(NUMBER_SIMULATIONS):
@@ -67,8 +76,8 @@ def run_mcts(game, network):
         for node in reversed(search_path):
             v = value if node.to_play == sim_game.turn - 1 else (1 - value)
             node.update(value)
-
-    root.print_node("Root")
+    if print_root:
+        root.print_node("Root")
     return choose_action(root), generate_mcts_policy(root)
 
 def select_mcts_action(node):

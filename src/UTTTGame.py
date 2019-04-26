@@ -209,12 +209,10 @@ class utttgame:
 def main():
     nn = NeuralNet.neuralnetwork()
     game = utttgame()
-    for i in range(150):
-        game.move([np.random.randint(3),
-                   np.random.randint(3),
-                   np.random.randint(3),
-                   np.random.randint(3)])
-    print(MCTS.run_mcts(game, nn))
+    while(game.state == -1):
+        action, _ = MCTS.run_mcts(game, nn, print_root=True)
+        game.move(game.cnn_action_to_coords(action))
+        print(game.board)
     sys.exit(2)
     #count = 0
     stats = np.zeros(3, dtype=int)
