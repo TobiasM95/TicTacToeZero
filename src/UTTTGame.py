@@ -45,7 +45,7 @@ class utttgame:
         copy.board = np.copy(self.board)
         copy.outer_field_state = np.copy(self.outer_field_state)
         copy.last_move = cp.deepcopy(self.last_move)
-        copy.sate = self.state
+        copy.state = self.state
         copy.last_N_board_states = np.copy(self.last_N_board_states)
         return copy
         
@@ -122,7 +122,6 @@ class utttgame:
             return
         elif np.sum(self.outer_field_state == -1) == 0:
             self.state = 0
-            print("outer field draw!")
             return
 
     #def check_single_board(self, coords, copied board?):
@@ -216,18 +215,12 @@ class utttgame:
         #each tuple has input (1x9x9xF), best_action (1x81), result (1x1)
         self.init_game()
         turns = []
-        count = 0
         while self.state == -1:
             state = self.get_convnet_input().reshape((1,9,9,2*self.NUMBER_OF_SAVED_GAME_STATES + 1))
             action, policy = MCTS.run_mcts(self, net)
             policy = policy.reshape((1,81))
             turns.append((state, policy, np.zeros((1,1))))
             self.move(self.cnn_action_to_coords(action))
-            count += 1
-            print(count)
-        print(self.state)
-        if self.state == 0:
-            self.print_board()
 
         #update value vector with game state (differentiate between players)
         for i, turn in enumerate(turns):
@@ -241,12 +234,18 @@ class utttgame:
         return turns
 
 def main():
-    nn = NeuralNet.neuralnetwork()
+    nn = NeuralNet.neuralnetwork("test")
     game = utttgame()
     while(game.state == -1):
-        action, _ = MCTS.run_mcts(game, nn, print_root=True)
-        game.move(game.cnn_action_to_coords(action))
-        print(game.board)
+        #action, _ = MCTS.run_mcts(game, nn)#, print_root=True)
+        #game.move(game.cnn_action_to_coords(action))
+        game.move([np.random.randint(3),
+                    np.random.randint(3),
+                    np.random.randint(3),
+                    np.random.randint(3)])
+    game.print_board()
+    print(game.outer_field_state)
+    print(game.state)
     sys.exit(2)
     #count = 0
     stats = np.zeros(3, dtype=int)

@@ -56,7 +56,7 @@ class Node():
         print("Max depth of node", self.get_depth())
 
 def run_mcts(game, network, print_root = False):
-    root = Node(state = game.get_convnet_input())
+    root = Node(state = np.copy(game.get_convnet_input()))
 
     for _ in range(NUMBER_SIMULATIONS):
         sim_game = game.copy_game()
@@ -76,7 +76,7 @@ def run_mcts(game, network, print_root = False):
 
         for node in reversed(search_path):
             v = value if node.to_play == sim_game.turn - 1 else (1 - value)
-            node.update(value)
+            node.update(v)
     if print_root:
         root.print_node("Root")
     return choose_action(root), generate_mcts_policy(root)

@@ -12,9 +12,9 @@ from keras.optimizers import Adam
 from keras.models import Model, load_model
 
 class neuralnetwork:
-    CONV_LAYER_NUM_FILTER = 16 #agz is 256
-    NUM_RES_LAYERS = 5 #agz is 19 or 39
-    ADAM_LR=2e-2
+    CONV_LAYER_NUM_FILTER = 64 #agz is 256
+    NUM_RES_LAYERS = 19 #agz is 19 or 39
+    ADAM_LR=1e-3
     
     def __init__(self, path, init=True):
         self.path = path
