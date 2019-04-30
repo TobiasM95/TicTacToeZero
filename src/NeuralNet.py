@@ -9,18 +9,32 @@ from keras.layers import Dense, Conv2D, BatchNormalization, Activation, Flatten
 from keras.layers import Input
 from keras.regularizers import l2
 from keras.optimizers import Adam
-from keras.models import Model
+from keras.models import Model, load_model
 
 class neuralnetwork:
     CONV_LAYER_NUM_FILTER = 16 #agz is 256
     NUM_RES_LAYERS = 5 #agz is 19 or 39
-    ADAM_LR=1e-3
+    ADAM_LR=2e-2
     
-    def __init__(self):
-        self.nn = self.init_nn()
+    def __init__(self, path, init=True):
+        self.path = path
+        if init:
+            self.nn = self.init_nn()
+            self.compile_net()
+        else:
+            self.nn = self.load_net()
+            self.compile_net()
+
+    def load_net(self):
+        return keras.models.load_model(str(self.path))
+
+    def save_net(self, note=""):
+        self.nn.save(str(self.path) + note)
+
+    def compile_net(self):
         self.nn.compile(loss=['categorical_crossentropy', 'mean_squared_error'],
                         optimizer=Adam(self.ADAM_LR))
-
+        
     def init_nn(self):
         input_shape = (9,9,UTTTGame.utttgame.NUMBER_OF_SAVED_GAME_STATES*2+1)
         inputs = Input(shape=input_shape)
