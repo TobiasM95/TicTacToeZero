@@ -10,6 +10,9 @@ import copy as cp
 class utttgame:
     NUMBER_OF_SAVED_GAME_STATES = 4
     def __init__(self):
+        self.init_game()
+        
+    def init_game(self):
         #turn player 1 (x) == 1, player 2 (o) == 2
         self.turn = 1
         #board is split in 3x3 array of 3x3 arrays (outer array mirrors inner array)
@@ -119,6 +122,7 @@ class utttgame:
             return
         elif np.sum(self.outer_field_state == -1) == 0:
             self.state = 0
+            print("outer field draw!")
             return
 
     #def check_single_board(self, coords, copied board?):
@@ -205,6 +209,36 @@ class utttgame:
                 int(outer_column),
                 int(inner_row),
                 int(inner_column)]
+
+    def play_game(self, net):
+        #plays a complete game with a neural network against itself
+        #returns list of tuples that represent turns
+        #each tuple has input (1x9x9xF), best_action (1x81), result (1x1)
+        self.init_game()
+        turns = []
+        count = 0
+        while self.state == -1:
+            state = self.get_convnet_input().reshape((1,9,9,2*self.NUMBER_OF_SAVED_GAME_STATES + 1))
+            action, policy = MCTS.run_mcts(self, net)
+            policy = policy.reshape((1,81))
+            turns.append((state, policy, np.zeros((1,1))))
+            self.move(self.cnn_action_to_coords(action))
+            count += 1
+            print(count)
+        print(self.state)
+        if self.state == 0:
+            self.print_board()
+
+        #update value vector with game state (differentiate between players)
+        for i, turn in enumerate(turns):
+            if self.state == 0:
+                #draw
+                turns[i][2][0,0] = 0.5
+            elif self.state == 1:
+                turns[i][2][0,0] = 1 - (i % 2)
+            elif self.state == 2:
+                turns[i][2][0,0] = 1 - ((i + 1) % 2)
+        return turns
 
 def main():
     nn = NeuralNet.neuralnetwork()

@@ -105,7 +105,7 @@ class neuralnetwork:
         
 def main():
     game = UTTTGame.utttgame()
-    nn = neuralnetwork()
+    nn = neuralnetwork("test")
     #print(nn.nn.summary())
     pol, val = nn.evaluate(game.get_convnet_input().reshape(-1,9,9,9))
     print(pol, val)

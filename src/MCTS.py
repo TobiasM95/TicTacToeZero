@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import numpy as np
+from scipy.special import softmax
 
-NUMBER_SIMULATIONS = 100 #agz is 800
+NUMBER_SIMULATIONS = 10 #agz is 800
 MCTS_TEMPERATURE = 1.0
 
 #states are convnet states
@@ -121,10 +122,14 @@ def choose_action(root):
     action = np.zeros(81)
     visit_counts = np.array([child.visit_count for child in root.children])
     scaled_counts = np.power(visit_counts, 1.0/MCTS_TEMPERATURE)
+    scaled_counts[scaled_counts == 0] = -np.inf
+    scaled_counts = softmax(scaled_counts)
     #create softmax distribution
     #choose random move from distribution
     #but for now just pick max move
-    index = np.argmax(scaled_counts)
+    index = np.random.choice(scaled_counts.shape[0], 1, p=scaled_counts)[0]
+    #print("MCTS", scaled_counts.shape, scaled_counts, len(root.children), index)
+    #index = np.argmax(scaled_counts)
     return root.children[index].action
     
 def generate_mcts_policy(root):
