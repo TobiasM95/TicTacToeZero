@@ -17,10 +17,10 @@ PROJECT_DIR = SCRIPT_DIR.parent
 NETWORK_DIR = PROJECT_DIR / "trained_networks"
 GAME_DIR = PROJECT_DIR / "game_data"
 
-TRAIN_CYCLES = 10
+TRAIN_CYCLES = 20
 TRAIN_EPOCHS = 10
-GAMES_PER_UPDATE = 10
-GAME_BUFFER_SIZE = 400
+GAMES_PER_UPDATE = 20
+GAME_BUFFER_SIZE = 20
 
 def main():
     if len(sys.argv) <= 1:
@@ -58,14 +58,15 @@ def main():
     for _ in range(TRAIN_CYCLES):
         #generate 10 new games and replace earliest 10 games with new games (or add if not enough)
         #train for a while (dataset has 400*81=32k)
-        '''for k in range(GAMES_PER_UPDATE):
+        for k in range(GAMES_PER_UPDATE):
             game_buffer.append(game_emu.play_game(net))
+        num_of_all_games += GAMES_PER_UPDATE
         save_path = str(net_game_dir
                              / ("games_"
-                                + str(num_of_all_games + GAMES_PER_UPDATE))) + ".game"
+                                + str(num_of_all_games))) + ".game"
         pickle.dump(game_buffer[-GAMES_PER_UPDATE:], open(save_path,"wb"))
         if len(game_buffer) >= 400:
-            game_buffer = game_buffer[-400:]'''
+            game_buffer = game_buffer[-400:]
         #prepare buffer for training session (needs numpy array of shape n_tx9x9x9)
         input_states = []
         target_policies = []

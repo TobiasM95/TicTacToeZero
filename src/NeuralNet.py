@@ -26,13 +26,14 @@ class neuralnetwork:
             self.compile_net()
 
     def load_net(self):
-        return keras.models.load_model(str(self.path))
+        return keras.models.load_model(str(self.path),
+                                       custom_objects={ 'logit_loss': self.logit_loss })
 
     def save_net(self, note=""):
         self.nn.save(str(self.path) + note)
 
     def compile_net(self):
-        self.nn.compile(loss=['categorical_crossentropy', 'mean_squared_error'],
+        self.nn.compile(loss=[self.logit_loss, 'mean_squared_error'],
                         optimizer=Adam(self.ADAM_LR))
         
     def init_nn(self):
@@ -45,6 +46,9 @@ class neuralnetwork:
         val = self.value_head(x)
         model = Model(inputs = inputs, outputs = [pol, val])
         return model
+
+    def logit_loss(self, y_true, y_pred):
+        return keras.backend.categorical_crossentropy(y_true, y_pred, from_logits=True)
     
     def conv_layer(self,
                    inputs,

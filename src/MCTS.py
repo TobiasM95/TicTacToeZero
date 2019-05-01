@@ -2,7 +2,7 @@
 import numpy as np
 from scipy.special import softmax
 
-NUMBER_SIMULATIONS = 10 #agz is 800
+NUMBER_SIMULATIONS = 100 #agz is 800
 MCTS_TEMPERATURE = 1.0
 
 #states are convnet states
@@ -110,12 +110,16 @@ def evaluate_node_and_expand(node, network, sim_game, terminal):
     # Expand the node.
     node.to_play = sim_game.turn - 1
     legal_move_indices = sim_game.get_legal_move_indices()
-    policy = np.array([np.exp(policy_logits[0,i]) for i in legal_move_indices])
-    policy_sum = np.sum(policy)
+    #policy = np.array([np.exp(policy_logits[0,i]
+    #                          - np.amax(policy_logits[0,legal_move_indices])) for i in legal_move_indices])
+    #policy = policy / np.sum(policy)
+    #print(policy.shape, "man")
+    policy = softmax(policy_logits[0,legal_move_indices])
+    #print(policy.shape, "sm", policy)
     for index, p in zip(legal_move_indices, policy):
         action = np.zeros(81)
         action[index] = 1
-        node.children.append(Node(state=None, action=action, prior=p / policy_sum))
+        node.children.append(Node(state=None, action=action, prior=p))
     return value
 
 def choose_action(root):
