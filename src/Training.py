@@ -49,8 +49,8 @@ def main():
             games = pickle.load(open(str(c), "rb"))
             for game in games:
                 game_buffer.append(game)
-            if len(game_buffer) >= 400:
-                game_buffer = game_buffer[-400:]
+            if len(game_buffer) >= GAME_BUFFER_SIZE:
+                game_buffer = game_buffer[-GAME_BUFFER_SIZE:]
                 break
 
     game_emu = g.utttgame()
@@ -65,8 +65,8 @@ def main():
                              / ("games_"
                                 + str(num_of_all_games))) + ".game"
         pickle.dump(game_buffer[-GAMES_PER_UPDATE:], open(save_path,"wb"))
-        if len(game_buffer) >= 400:
-            game_buffer = game_buffer[-400:]
+        if len(game_buffer) >= GAME_BUFFER_SIZE:
+            game_buffer = game_buffer[-GAME_BUFFER_SIZE:]
         #prepare buffer for training session (needs numpy array of shape n_tx9x9x9)
         input_states = []
         target_policies = []
