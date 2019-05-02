@@ -234,11 +234,11 @@ class utttgame:
         return turns
 
 def main():
-    nn = NeuralNet.neuralnetwork("test")
+    nn = NeuralNet.neuralnetwork("../trained_networks/Remote", init=False)
     game = utttgame()
     while(game.state == -1):
-        #action, _ = MCTS.run_mcts(game, nn)#, print_root=True)
-        #game.move(game.cnn_action_to_coords(action))
+        action, _ = MCTS.run_mcts(game, nn)#, print_root=True)
+        game.move(game.cnn_action_to_coords(action))
         game.move([np.random.randint(3),
                     np.random.randint(3),
                     np.random.randint(3),
